@@ -1,44 +1,21 @@
-const http = require('http');
-const fs = require('fs');
+const express = require('express');
+const path = require('path');
 
+const app = express();
 const port = process.env.PORT || 3000;
 
-const server = http.createServer((req, res) => {
-	let pageData;
-	let code;
-
-	if (req.url === '/favicon.ico') {
-		return;
-	} else if (req.url === '/') {
-		pageData = fs.readFileSync('./pages/index.html', function (err, html) {
-			if (err) {
-				throw err;
-			}
-		});
-		code = 200;
-	} else if (req.url === '/about' || req.url === '/contact-me') {
-		pageData = fs.readFileSync(
-			`./pages/${req.url}.html`,
-			function (err, html) {
-				if (err) {
-					throw err;
-				}
-			}
-		);
-		code = 200;
-	} else {
-		pageData = fs.readFileSync(`./pages/404.html`, function (err, html) {
-			if (err) {
-				throw err;
-			}
-		});
-		code = 404;
-	}
-	res.statusCode = code;
-	res.setHeader('Content-Type', 'text/html');
-	res.end(pageData);
+app.get('/', function (req, res) {
+	res.sendFile(path.join(__dirname, 'pages/index.html'));
 });
 
-server.listen(port, () => {
+app.get('/about', function (req, res) {
+	res.sendFile(path.join(__dirname, 'pages/about.html'));
+});
+
+app.use((req, res, next) => {
+	res.sendFile(path.join(__dirname, 'pages/404.html'));
+});
+
+app.listen(port, () => {
 	console.log(`Server running at port ${port}`);
 });
